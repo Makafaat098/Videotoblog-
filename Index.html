@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Video to Blog Generator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+    }
+    textarea, input[type="file"] {
+      width: 100%;
+      margin: 10px 0;
+    }
+    #output {
+      white-space: pre-wrap;
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 15px;
+      background: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <h2>Video to Blog Generator (Client-side only)</h2>
+
+  <label>Paste YouTube Link (Optional):</label>
+  <input type="text" id="videoLink" placeholder="https://youtu.be/abc123" />
+
+  <label>Upload Subtitle File (.srt or .vtt):</label>
+  <input type="file" id="subtitleFile" accept=".srt,.vtt" />
+
+  <button onclick="generateBlog()">Generate Blog</button>
+
+  <h3>Generated Blog:</h3>
+  <div id="output">Your blog will appear here...</div>
+
+  <script>
+    function parseSubtitles(text) {
+      // Remove timestamps and numbers from .srt
+      return text
+        .replace(/\d+\n/g, '') // remove subtitle sequence numbers
+        .replace(/(\d{2}:\d{2}:\d{2},\d{3}).*?(\d{2}:\d{2}:\d{2},\d{3})/g, '') // remove timestamp lines
+        .replace(/(\d{2}:\d{2}.\d{3}) --> (\d{2}:\d{2}.\d{3})/g, '') // .vtt format
+        .replace(/\n+/g, '\n') // normalize empty lines
+        .trim();
+    }
+
+    function generateBlog() {
+      const fileInput = document.getElementById('subtitleFile');
+      const output = document.getElementById('output');
+
+      if (!fileInput.files.length) {
+        alert("Please upload a subtitle (.srt or .vtt) file.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const rawText = e.target.result;
+        const cleanText = parseSubtitles(rawText);
+
+        const blog = `# Blog Post from Video\n\n## Summary\n${cleanText.slice(0, 500)}...\n\n## Full Transcript\n${cleanText}`;
+        output.textContent = blog;
+      };
+      reader.readAsText(fileInput.files[0]);
+    }
+  </script>
+</body>
+</html>
